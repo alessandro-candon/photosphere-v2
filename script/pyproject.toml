@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+package = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[project]
+name = "photosphere"
+version = "1.0.12"
+description = "A tool to save your fotos and videos in the cloud at very low price"
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [
+    {name = "Alessandro Candon", email = "alexcandy91@gmail.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "click>=8.2.1",
+    "imagehash",
+    "pillow>=11.3.0",
+    "pytest>=8.4.1",
+    "tinydb>=4.8.2",
+    "tqdm>=4.67.1",
+    "videohash",
+    "videohash2>=3.2.2",
+    "firebase-admin>=7.0.0",
+    "ffmpeg-python>=0.2.0",
+]
+
+[project.scripts]
+photosphere = "src.main:cli"

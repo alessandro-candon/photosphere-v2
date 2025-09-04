@@ -1,0 +1,14 @@
+# VS Code
+.vscode/
+.idea
+
+# macOS
+.DS_Store
+
+# Docker
+*.tar
+
+
+.firebaserc
+.firebase
+firebase.json

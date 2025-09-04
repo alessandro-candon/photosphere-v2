@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package photosphere;
+
+enum FileType {
+    FILE = 0;
+    IMAGE = 1;
+    VIDEO = 2;
+}
+
+message PhotosphereFile {
+    string source_bucket_uri = 2;
+    FileType file_type = 4;
+    int64 created_at_timestamp = 6;
+    string geohash = 9;
+    string hash = 10;
+}
