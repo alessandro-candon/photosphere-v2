@@ -92,7 +92,8 @@ const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
  * @returns A boolean indicating if the geohash's center is within the radius.
  */
 export const isThisGeohashInsideThisCoordinatesRadius = (geohash: string, lat: number, lon: number, radius: number): boolean => {
-    try {
+  console.log('isThisGeohashInsideThisCoordinatesRadius', geohash, lat, lon, radius);
+  try {
         // 1. Decode the geohash to get the coordinates of its center.
         const geohashCoords = decodeGeohash(geohash);
 

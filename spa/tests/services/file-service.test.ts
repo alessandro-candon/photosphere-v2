@@ -1,11 +1,11 @@
 import {describe, it, expect, beforeEach} from 'vitest';
 import {fileService} from '@/services/file-service.ts';
-import {FileTypeEnum, type PhotosphereFile} from '@/protobuf/photosphere-file.ts';
+import {FileTypeEnum, type IPhotosphereFile} from '@/protobuf/photosphere-file.ts';
 import type IFileFilters from "@/interfaces/IFileFilters.ts";
 import type {IPhotosphereViewFile} from "@/interfaces/IPhotosphereViewFile.ts";
 
 describe('FileService', () => {
-  let mockFiles: PhotosphereFile[];
+  let mockFiles: IPhotosphereFile[];
 
   const timestamp01 = new Date('2025-02-01').getTime() / 1000;
   const timestamp02 = new Date('2025-02-02').getTime() / 1000;

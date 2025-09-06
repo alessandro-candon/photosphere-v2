@@ -20,6 +20,18 @@ export const useAlbumStore = defineStore('album-store', {
         album.hashes = Array.from(new Set([...existingHashes, ...hashes]));
       }
     },
+    addHashToAlbum(name: string, hash: string) {
+      const album = this.albums.find(album => album.name === name);
+      if (album && !album.hashes.includes(hash)) {
+        album.hashes.push(hash);
+      }
+    },
+    removeHashFromAlbum(name: string, hash: string) {
+      const album = this.albums.find(album => album.name === name);
+      if (album) {
+        album.hashes = album.hashes.filter(h => h !== hash);
+      }
+    },
     getAlbums(fullTextSearch?: string): IAlbum[] {
       if (fullTextSearch) {
         const search = fullTextSearch.toLowerCase();

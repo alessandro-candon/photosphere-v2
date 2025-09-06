@@ -1,4 +1,17 @@
-import {FileTypeEnum} from "@/protobuf/photosphere-file.ts";
+import {FileTypeEnum} from "@/interfaces/IPhotosphereViewFile.ts";
+
+export const getFileTypeLabel = (fileType: FileTypeEnum) => {
+  switch (fileType) {
+    case FileTypeEnum.IMAGE:
+      return 'Image';
+    case FileTypeEnum.VIDEO:
+      return 'Video';
+    case FileTypeEnum.FILE:
+      return 'File';
+    default:
+      return 'Unknown';
+  }
+}
 
 export const getFileTypeIcon = (fileType: FileTypeEnum) => {
   switch (fileType) {

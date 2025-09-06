@@ -1,11 +1,14 @@
 import {useFileStore} from "@/stores/file-store.ts";
-import {type PhotosphereFile} from "@/protobuf/photosphere-file.ts";
 import {firebaseService} from "@/services/firebase-service.ts";
 import type IFileFilters from "@/interfaces/IFileFilters.ts";
 import {isThisGeohashInsideThisCoordinatesRadius} from "@/utils/geohash.ts";
 import type {IAlbum} from "@/interfaces/IAlbum.ts";
 import {useAlbumStore} from "@/stores/album-store.ts";
-import type {IPhotosphereViewFile} from "@/interfaces/IPhotosphereViewFile.ts";
+import type {
+  IPhotosphereFile,
+  IPhotosphereFileSignedUrls,
+  IPhotosphereViewFile
+} from "@/interfaces/IPhotosphereViewFile.ts";
 import type {StoreDefinition} from "pinia";
 
 class FileService {
@@ -29,7 +32,7 @@ class FileService {
   ): Promise<IPhotosphereViewFile[]> {
     return new Promise(async (resolve, reject) => {
       this.fileStore.getFiles(await this.getSignedUrlIfNotExists(this.DATABASE_URI))
-        .then(async (files: PhotosphereFile[]) => {
+        .then(async (files: IPhotosphereFile[]) => {
           files = this.filterFiles(files, filter);
           const startIndex = page * pageSize;
           const endIndex = startIndex + pageSize;
@@ -58,6 +61,30 @@ class FileService {
     });
   }
 
+  getFileWithSignedUrlsByHash(hash: string): Promise<IPhotosphereFileSignedUrls> {
+    return new Promise(async (resolve, reject) => {
+      this.fileStore.getFiles(await this.getSignedUrlIfNotExists(this.DATABASE_URI))
+        .then(async (files: IPhotosphereFile[]) => {
+          const file = files.find((f: IPhotosphereFile) => f.hash === hash);
+          if (file) {
+            try {
+              const fileSignedUrls: IPhotosphereFileSignedUrls = {
+                ...file,
+                signedSourceBucketUri: await this.getSignedUrlIfNotExists(file.sourceBucketUri),
+                signedSourceBucketThumbnailUri: await this.getSignedUrlIfNotExists(file.sourceBucketThumbnailUri)
+              }
+              resolve(fileSignedUrls);
+            } catch (e) {
+              console.error(`Failed to get signed URL for ${file.hash}:`, e);
+              reject(`Failed to get signed URL for ${file.hash}:`);
+            }
+          } else {
+            reject(`File with hash ${hash} not found.`);
+          }
+        })
+    });
+  }
+
   getSignedUrlIfNotExists(bucketUri: string): Promise<string> {
     return new Promise(async (resolve, reject) => {
       if (this.fileStore.hasSignedUrlMap(bucketUri)) {
@@ -81,7 +108,7 @@ class FileService {
     });
   }
 
-  private filterFiles(files: PhotosphereFile[], filter: IFileFilters): PhotosphereFile[] {
+  private filterFiles(files: IPhotosphereFile[], filter: IFileFilters): IPhotosphereFile[] {
     console.log('Applying filter:', filter);
     let startDateTimestamp: number, endDateTimestamp: number = 0;
     const filterDateRangeIsActive =
@@ -92,9 +119,9 @@ class FileService {
       startDateTimestamp = (filter.dateRange.startDate as Date).setHours(0,0,0,0) / 1000;
       endDateTimestamp = (filter.dateRange.endDate as Date).setHours(23,59,59,999) / 1000;
     }
-    return files.filter((file: PhotosphereFile) => {
+    return files.filter((file: IPhotosphereFile) => {
       let isMatchingTheFilter = true;
-      if (filter.hashList && filter.hashList.length > 0) {
+      if (filter.hashList && filter.hashList.length >= 0) {
         isMatchingTheFilter = filter.hashList.includes(file.hash);
       }
       if (filter.type !== undefined) {

@@ -1,20 +1,6 @@
 import protobuf from 'protobufjs';
 import {convertSourceBucketUriToThumbnailUri} from "@/utils/utils.ts";
-
-export enum FileTypeEnum {
-  FILE = 0,
-  IMAGE = 1,
-  VIDEO = 2,
-}
-
-export interface PhotosphereFile {
-  sourceBucketUri: string;
-  sourceBucketThumbnailUri: string;
-  fileType: FileTypeEnum;
-  createdAtTimestamp: number;
-  geohash: string;
-  hash: string;
-}
+import {FileTypeEnum, type IPhotosphereFile} from "@/interfaces/IPhotosphereViewFile.ts";
 
 // Protobuf schema definition
 const protoSchema = `
@@ -74,7 +60,7 @@ function decodeVarint(buffer: Uint8Array, offset: number): { value: number; byte
 }
 
 // Convert protobuf snake_case to camelCase
-function convertToJsObject(protoObj: PhotosphereFile): PhotosphereFile {
+function convertToJsObject(protoObj: IPhotosphereFile): IPhotosphereFile {
   return {
     sourceBucketUri: protoObj.sourceBucketUri,
     sourceBucketThumbnailUri: convertSourceBucketUriToThumbnailUri(protoObj.sourceBucketUri, protoObj.hash),
@@ -85,7 +71,7 @@ function convertToJsObject(protoObj: PhotosphereFile): PhotosphereFile {
   };
 }
 
-export async function decodePhotosphereFileBuffer(buffer: ArrayBuffer): Promise<PhotosphereFile[]> {
+export async function decodePhotosphereFileBuffer(buffer: ArrayBuffer): Promise<IPhotosphereFile[]> {
   await initProtobuf();
 
   if (!PhotosphereFileMessage) {
@@ -93,7 +79,7 @@ export async function decodePhotosphereFileBuffer(buffer: ArrayBuffer): Promise<
   }
 
   const uint8Array = new Uint8Array(buffer);
-  const files: PhotosphereFile[] = [];
+  const files: IPhotosphereFile[] = [];
   let offset = 0;
 
   try {
@@ -113,11 +99,11 @@ export async function decodePhotosphereFileBuffer(buffer: ArrayBuffer): Promise<
 
       // Decode the protobuf message
       const decoded = PhotosphereFileMessage.decode(messageBytes);
-      const plain: PhotosphereFile = PhotosphereFileMessage.toObject(decoded, {
+      const plain: IPhotosphereFile = PhotosphereFileMessage.toObject(decoded, {
         longs: Number,
         enums: Number,
         bytes: String,
-      }) as PhotosphereFile;
+      }) as IPhotosphereFile;
 
       files.push(convertToJsObject(plain));
     }
@@ -128,7 +114,7 @@ export async function decodePhotosphereFileBuffer(buffer: ArrayBuffer): Promise<
   }
 }
 
-export async function downloadAndDecodeProtobuf(url: string): Promise<PhotosphereFile[]> {
+export async function downloadAndDecodeProtobuf(url: string): Promise<IPhotosphereFile[]> {
   try {
     const response = await fetch(url);
     if (!response.ok) {

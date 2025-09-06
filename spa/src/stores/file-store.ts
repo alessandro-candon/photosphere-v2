@@ -1,15 +1,16 @@
 import {defineStore, type StateTree, type StoreDefinition} from 'pinia'
-import {downloadAndDecodeProtobuf, type PhotosphereFile} from "@/protobuf/photosphere-file.ts";
+import type {IPhotosphereFile} from "@/interfaces/IPhotosphereViewFile.ts";
+import {downloadAndDecodeProtobuf} from "@/protobuf/photosphere-file.ts";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 export const useFileStore: StoreDefinition = defineStore('file-store', {
   state: () => ({
-    files: [] as PhotosphereFile[],
+    files: [] as IPhotosphereFile[],
     signedUrlsMap: new Map<string, string>()
   }),
   actions: {
-    async getFiles(url: string): Promise<PhotosphereFile[]> {
+    async getFiles(url: string): Promise<IPhotosphereFile[]> {
       if (this.files.length > 0) {
         return this.files
       }

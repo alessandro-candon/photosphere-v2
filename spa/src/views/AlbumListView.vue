@@ -6,7 +6,8 @@
       <q-spinner color="primary" size="40px" class="q-mb-md"/>
     </div>
 
-    <div v-if="!loadingRef && albumsRef.length === 0" class="q-my-xl flex flex-center column text-grey">
+    <div v-if="!loadingRef && albumsRef.length === 0"
+         class="q-my-xl flex flex-center column text-grey">
       <q-icon name="folder_open" size="48px" class="q-mb-md"/>
       <div>No albums found</div>
     </div>
@@ -20,7 +21,9 @@
               <q-badge color="primary" class="q-mt-sm">{{ album.hashes.length }} files</q-badge>
             </q-card-section>
             <q-card-section>
-              <div v-if="fileForPreviewRefByAlbum[album.name] && fileForPreviewRefByAlbum[album.name].length > 0" class="album-preview-images" style="display: flex; align-items: center;">
+              <div
+                v-if="fileForPreviewRefByAlbum[album.name] && fileForPreviewRefByAlbum[album.name].length > 0"
+                class="album-preview-images" style="display: flex; align-items: center;">
                 <q-img
                   v-for="(file) in fileForPreviewRefByAlbum[album.name]"
                   :key="file.hash"
@@ -29,9 +32,13 @@
                   class="album-preview-thumb q-mr-xs"
                   style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;"
                 />
-                <q-badge v-if="album.hashes.length > previewImageCount" color="grey" class="q-ml-xs">...</q-badge>
+                <q-badge v-if="album.hashes.length > previewImageCount" color="grey"
+                         class="q-ml-xs">...
+                </q-badge>
               </div>
-              <div v-if="fileForPreviewRefByAlbum[album.name] && fileForPreviewRefByAlbum[album.name].length === 0" class="text-grey-5 text-caption">
+              <div
+                v-if="fileForPreviewRefByAlbum[album.name] && fileForPreviewRefByAlbum[album.name].length === 0"
+                class="text-grey-5 text-caption">
                 No preview available
               </div>
             </q-card-section>
@@ -42,16 +49,17 @@
 
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
       <q-fab icon="add" direction="up" color="primary">
-        <q-fab-action @click="syncWithCloud" color="dark" icon="cloud_sync" />
+        <q-fab-action @click="syncWithCloud" color="dark" icon="cloud_sync"/>
       </q-fab>
     </q-page-sticky>
   </q-page>
 
   <AlbumContentViewModal
-      v-if="selectedAlbumRef"
-      v-model="showAlbumContentModalRef"
-      :album="selectedAlbumRef"
-    />
+    v-if="selectedAlbumRef"
+    v-model="showAlbumContentModalRef"
+    :album="selectedAlbumRef"
+    @update:model-value="reloadAlbumsAndContent"
+  />
 </template>
 
 <script setup lang="ts">
@@ -68,7 +76,7 @@ import {
   QPageSticky,
   QPage, useQuasar
 } from 'quasar';
-import { useAlbumStore } from '../stores/album-store';
+import {useAlbumStore} from '../stores/album-store';
 import {fileService} from "@/services/file-service.ts";
 import type {IAlbum} from "@/interfaces/IAlbum.ts";
 import type {IPhotosphereViewFile} from "@/interfaces/IPhotosphereViewFile.ts";
@@ -89,23 +97,23 @@ const selectedAlbumRef = ref<IAlbum>()
 
 const setPreviewImagesForAlbum = (album: IAlbum) => {
   fileService.getViewListOfFiles(0, {
-      dateRange: {
-        active: false,
-        startDate: null,
-        endDate: null
-      },
-      geohash: {
-        active: false,
-        latitude: null,
-        longitude: null,
-        radius: 0
-      },
-      hashList: album.hashes
-    }, previewImageCount).then(
-      (files) => {
-        console.log(files);
-        fileForPreviewRefByAlbum.value[album.name] = files;
-      }
+    dateRange: {
+      active: false,
+      startDate: null,
+      endDate: null
+    },
+    geohash: {
+      active: false,
+      latitude: null,
+      longitude: null,
+      radius: 0
+    },
+    hashList: album.hashes
+  }, previewImageCount).then(
+    (files) => {
+      console.log(files);
+      fileForPreviewRefByAlbum.value[album.name] = files;
+    }
   ).catch((error) => {
     console.error('Error fetching preview images for album:', error);
     $q.notify({
@@ -136,13 +144,17 @@ const handleOpenAlbum = (album: IAlbum) => {
   showAlbumContentModalRef.value = true;
 }
 
+const reloadAlbumsAndContent = () => {
+  albumsRef.value = albumStore.getAlbums();
+  albumsRef.value.forEach((album) => {
+    setPreviewImagesForAlbum(album);
+  });
+}
+
 onMounted(
   () => {
     fileService.initFileService();
-    albumsRef.value = albumStore.getAlbums();
-    albumsRef.value.forEach((album) => {
-      setPreviewImagesForAlbum(album);
-    });
+    reloadAlbumsAndContent()
   }
 )
 
@@ -152,11 +164,13 @@ onMounted(
 .album-grid-container {
   margin-top: 16px;
 }
+
 .album-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
 }
+
 .album-item {
   display: flex;
   flex-direction: column;

@@ -133,7 +133,10 @@ const selectLocation = (location: LocationResult) => {
   selectedLocation.value = location
   searchQuery.value = location.display_name
   searchResults.value = []
-    if (canConfirm.value && selectedLocation.value) {
+}
+
+const handleConfirmLocation = () => {
+  if (canConfirm.value && selectedLocation.value) {
     const locationData: ILocation = {
       placeId: selectedLocation.value.place_id,
       displayName: selectedLocation.value.display_name,
@@ -254,6 +257,12 @@ const clearSearch = () => {
       </q-card-section>
 
       <q-card-actions align="right" class="q-pa-md">
+        <q-btn
+          :disabled="!canConfirm"
+          color="primary"
+          label="Confirm"
+          @click="handleConfirmLocation()"
+        />
         <q-btn
           flat
           label="Cancel"

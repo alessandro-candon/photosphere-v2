@@ -44,6 +44,16 @@
       @cancel="handleSelectedFilesActionModalCancel"
       />
 
+    <FileActionModal
+      v-if="selectedFileRef"
+      v-model="showFileActionModalRef"
+      :file="selectedFileRef"
+      :album="null"
+      @open="console.log('File open', $event)"
+      @showInfo="console.log('File show info', $event)"
+      @addToAlbum="console.log('File add to album', $event)"
+      @cancel="showFileActionModalRef = false"
+    />
   </q-page>
 </template>
 
@@ -57,11 +67,11 @@ import LocationModal from "@/modals/LocationModal.vue";
 import type ILocation from "@/interfaces/ILocation.ts";
 import SelectedFilesActionModal from "@/modals/SelectedFilesActionModal.vue";
 import {useAlbumStore} from "@/stores/album-store.ts";
-import type {IPhotosphereViewFile} from "@/interfaces/IPhotosphereViewFile.ts";
+import {FileTypeEnum, type IPhotosphereViewFile} from "@/interfaces/IPhotosphereViewFile.ts";
 import FileGridListComponent from "@/components/FileGridListComponent.vue";
-import {fileService} from "@/services/file-service.ts";
-import {FileTypeEnum} from "@/protobuf/photosphere-file.ts";
 import HeaderPageComponent from "@/components/HeaderPageComponent.vue";
+import FileActionModal from "@/modals/FileActionModal.vue";
+import SelectAlbumModal from "@/modals/SelectAlbumModal.vue";
 
 firebaseService.initStorage();
 
@@ -90,6 +100,10 @@ const showLocationModalRef = ref(false);
 const selectedLocationRef = ref<ILocation | null>(null);
 const selectedFileListRef = ref<Set<string>>(new Set());
 const showSelectionToolbarModalRef = ref(false);
+const showFileActionModalRef = ref(false);
+const selectedFileRef = ref<IPhotosphereViewFile | null>(null);
+const selectAlbumModalRef = ref(false);
+
 
 const addFilterFileType = () => {
   // Quasar dialog to select file type filter with a dropdown
@@ -119,6 +133,10 @@ const handleSelectedFilesActionModalCancel = () => {
   selectedFileListRef.value = new Set();
 }
 
+const handleAddToAlbumRequest = (file: IPhotosphereViewFile): void => {
+  showFileActionModalRef.value = false;
+}
+
 const handleCreateAlbum = () => {
       $q.dialog({
           title: 'Add new album',
@@ -142,6 +160,9 @@ const handleCreateAlbum = () => {
         })
       }).onCancel(() => {
         handleSelectedFilesActionModalCancel();
+        selectedFileListRef.value = new Set();
+        showSelectionToolbarModalRef.value = false;
+        isActiveLongPressRef.value = false;
       });
 }
 
@@ -191,27 +212,8 @@ const handleImageClick = (file: IPhotosphereViewFile) => {
   if (isActiveLongPressRef.value) {
     toggleSelectionOfSelectionValue(file);
   } else {
-    $q.dialog({
-      title: 'Open Image',
-      message: 'Do you want to open this image?',
-      cancel: true,
-      persistent: true
-    }).onOk(async () => {
-      if (file.signedThumbnailUrl) {
-        $q.loading.show();
-        try {
-          const signedUrl = await fileService.getSignedUrlIfNotExists(file.sourceUri)
-          window.open(signedUrl, '_blank');
-        } catch {
-          $q.notify({
-            type: 'negative',
-            message: 'Failed to open image. Please try again later.'
-          });
-        } finally {
-          $q.loading.hide()
-        }
-      }
-    });
+    selectedFileRef.value = file;
+    showFileActionModalRef.value = true;
   }
 }
 

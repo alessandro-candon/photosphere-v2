@@ -16,5 +16,10 @@ describe('isThisGeohashInsideThisCoordinatesRadius', () => {
     const geohash = 'u0nfs0';
     expect(isThisGeohashInsideThisCoordinatesRadius(geohash, lat, lon, 20)).toBe(false);
   });
+
+  it('should return true, it is inside the radius', () => {
+        // 'latitude': 46.0649223325, 'longitude': 13.23360061638889, 'geohash': 'u21qj1u7t'
+    expect(isThisGeohashInsideThisCoordinatesRadius('u21qj1u7t', 46.0634632, 13.2358377, 10000)).toBe(true);
+  });
 });
 

@@ -123,7 +123,7 @@ onMounted(() => {
     </div>
 
     <div v-if="!loadingRef && !errorRef && filesViewRef.length > 0" class="photo-grid-container">
-      <q-infinite-scroll @load="onLoadNewSignedUrl" :offset="500" :debounce="200">
+      <q-infinite-scroll @load="onLoadNewSignedUrl" :offset="800" :debounce="200">
         <div class="photo-grid">
           <div
             :class="['photo-item']"

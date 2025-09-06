@@ -7,11 +7,19 @@ import {useFileStore} from "@/stores/file-store.ts";
 
 const firebaseStore = useFirebaseStore();
 const fileStore = useFileStore();
-const fileCount = ref<number | null>(null);
-const fileCashedCount = ref<number | null>(null);
+const fileCountRef = ref<number | null>(null);
+const fileCashedCountRef = ref<number | null>(null);
+const versionRef = ref<string>('Loading...');
 
-fileCount.value = fileStore.files.length;
-fileCashedCount.value = fileStore.signedUrlsMap.size;
+fileCountRef.value = fileStore.files.length;
+fileCashedCountRef.value = fileStore.signedUrlsMap.size;
+
+fetch('/version.txt')
+  .then(response => response.text())
+  .then(data => {
+    versionRef.value = data;
+  });
+
 
 </script>
 
@@ -20,6 +28,10 @@ fileCashedCount.value = fileStore.signedUrlsMap.size;
     <HeaderPageComponent title="Settings"/>
     <div class="q-my-xl flex flex-center column">
       <q-card class="q-mb-lg" style="max-width: 500px; width: 100%;">
+        <q-card-section>
+          <div class="text-h6">Application Info</div>
+          <div><b>Version:</b> {{ versionRef }}</div>
+        </q-card-section>
         <q-card-section>
           <div class="text-h6">Firebase Store Data</div>
           <div><b>Email:</b> {{ firebaseStore.email }}</div>
@@ -31,15 +43,16 @@ fileCashedCount.value = fileStore.signedUrlsMap.size;
       <q-card style="max-width: 500px; width: 100%;">
         <q-card-section>
           <div class="text-h6">File Store Statistics</div>
-          <div v-if="fileCount !== null"><b>Number of files stored:</b> {{ fileCount }}</div>
+          <div v-if="fileCountRef !== null"><b>Number of files stored:</b> {{ fileCountRef }}</div>
           <div v-else>No files found</div>
         </q-card-section>
         <q-card-section>
           <div class="text-h6">File Cache Statistics</div>
-          <div v-if="fileCashedCount !== null">
-            <b>Number of files cached:</b> {{ fileCashedCount }}
-            <section v-if="fileCount">
-              <b>Percentage of cashed items:</b> {{ ((fileCashedCount / fileCount) * 100).toFixed(2) }}%
+          <div v-if="fileCashedCountRef !== null">
+            <b>Number of files cached:</b> {{ fileCashedCountRef }}
+            <section v-if="fileCountRef">
+              <b>Percentage of cashed items:</b>
+              {{ ((fileCashedCountRef / fileCountRef) * 100).toFixed(2) }}%
             </section>
           </div>
           <div v-else>No cached files found</div>
