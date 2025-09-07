@@ -141,6 +141,9 @@ class FileService {
           isThisGeohashInsideThisCoordinatesRadius(file.geohash, filter.geohash.latitude, filter.geohash.longitude, filter.geohash.radius)
         );
       }
+      if (filter.fileName && filter.fileName.length > 0) {
+        isMatchingTheFilter = isMatchingTheFilter && file.sourceBucketUri.toLowerCase().includes(filter.fileName.toLowerCase());
+      }
       return isMatchingTheFilter;
     })
   }

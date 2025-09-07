@@ -20,6 +20,10 @@
         <q-fab-action
           @click="addFilterOnlyFilesNotInAlbum"
           :color="isActivatedOnlyFilesNotInAlbumRef ? 'accent' : 'dark'" icon="rule_folder"/>
+        <q-fab-action
+          @click="addFilterByFileName"
+          color="dark"
+          icon="search"/>
       </q-fab>
     </q-page-sticky>
 
@@ -246,6 +250,29 @@ const handleDateRangeCancel = () => {
   filtersRef.value.dateRange.startDate = null;
   filtersRef.value.dateRange.endDate = null;
 }
+
+const addFilterByFileName = () => {
+  $q.dialog({
+    title: 'Filter by file name',
+    message: 'Enter the file name or part of it to filter',
+    prompt: {
+      model: '',
+      isValid: val => val.length > 0,
+      type: 'text'
+    },
+    cancel: true,
+    persistent: true
+  }).onOk(data => {
+    filtersRef.value.fileName = data;
+    $q.notify({
+      type: 'info',
+      message: 'File name filter applied',
+      timeout: 1000
+    })
+  }).onCancel(() => {
+    filtersRef.value.fileName = undefined;
+  });
+};
 
 const addFilterOnlyFilesNotInAlbum = () => {
   isActivatedOnlyFilesNotInAlbumRef.value = !isActivatedOnlyFilesNotInAlbumRef.value;
