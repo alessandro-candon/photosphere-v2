@@ -17,6 +17,9 @@
         <q-fab-action @click="addFilterDateRange" color="dark" icon="date_range"/>
         <q-fab-action @click="addFilterGeohash" color="dark" icon="fmd_good"/>
         <q-fab-action @click="addFilterFileType" color="dark" icon="insert_drive_file"/>
+        <q-fab-action
+          @click="addFilterOnlyFilesNotInAlbum"
+          :color="isActivatedOnlyFilesNotInAlbumRef ? 'accent' : 'dark'" icon="rule_folder"/>
       </q-fab>
     </q-page-sticky>
 
@@ -39,21 +42,25 @@
 
     <SelectedFilesActionModal
       v-model="showSelectionToolbarModalRef"
-      @create-album="handleCreateAlbum"
-      @add-to-album="console.log('Add to Album clicked')"
+      @createAlbum="handleCreateAlbum"
+      @addToAlbum="handleAddToAlbum"
       @cancel="handleSelectedFilesActionModalCancel"
-      />
+    />
 
     <FileActionModal
       v-if="selectedFileRef"
       v-model="showFileActionModalRef"
       :file="selectedFileRef"
       :album="null"
-      @open="console.log('File open', $event)"
-      @showInfo="console.log('File show info', $event)"
-      @addToAlbum="console.log('File add to album', $event)"
+      :is-active-add-to-album="true"
+      :is-active-remove-from-album="true"
       @cancel="showFileActionModalRef = false"
     />
+
+    <SelectAlbumModal
+      v-model="selectAlbumModalRef"
+      @select="handleAlbumChoice"
+      @cancel="selectAlbumModalRef = false"/>
   </q-page>
 </template>
 
@@ -72,6 +79,7 @@ import FileGridListComponent from "@/components/FileGridListComponent.vue";
 import HeaderPageComponent from "@/components/HeaderPageComponent.vue";
 import FileActionModal from "@/modals/FileActionModal.vue";
 import SelectAlbumModal from "@/modals/SelectAlbumModal.vue";
+import type {IAlbum} from "@/interfaces/IAlbum.ts";
 
 firebaseService.initStorage();
 
@@ -89,7 +97,7 @@ const filtersRef = ref<IFileFilters>({
     latitude: null,
     longitude: null,
     radius: 0,
-  },
+  }
 });
 
 const isActiveLongPressRef = ref(false);
@@ -102,8 +110,8 @@ const selectedFileListRef = ref<Set<string>>(new Set());
 const showSelectionToolbarModalRef = ref(false);
 const showFileActionModalRef = ref(false);
 const selectedFileRef = ref<IPhotosphereViewFile | null>(null);
+const isActivatedOnlyFilesNotInAlbumRef = ref(false);
 const selectAlbumModalRef = ref(false);
-
 
 const addFilterFileType = () => {
   // Quasar dialog to select file type filter with a dropdown
@@ -123,50 +131,81 @@ const addFilterFileType = () => {
     persistent: true
   }).onOk(data => {
     filtersRef.value.type = data;
+    $q.notify({
+      type: 'info',
+      message: 'File type filter applied',
+      timeout: 1000
+    })
   }).onCancel(() => {
     filtersRef.value.type = undefined;
   });
 };
+
+const handleAddToAlbum = () => {
+  selectAlbumModalRef.value = true;
+}
+
+const handleAlbumChoice = (album: IAlbum) => {
+  if (selectedFileListRef.value.size === 0) {
+    $q.notify({
+      type: 'negative',
+      message: 'No files selected',
+      timeout: 1000
+    });
+    return;
+  }
+  albumStore.addHashesToAlbum(album.name, selectedFileListRef.value);
+  $q.notify({
+    type: 'positive',
+    message: `Added ${selectedFileListRef.value.size} files to album "${album.name}"`,
+    timeout: 1000
+  });
+  selectedFileListRef.value = new Set();
+  showSelectionToolbarModalRef.value = false;
+  isActiveLongPressRef.value = false;
+  selectAlbumModalRef.value = false;
+}
 
 const handleSelectedFilesActionModalCancel = () => {
   showSelectionToolbarModalRef.value = false;
   selectedFileListRef.value = new Set();
 }
 
-const handleAddToAlbumRequest = (file: IPhotosphereViewFile): void => {
-  showFileActionModalRef.value = false;
-}
-
 const handleCreateAlbum = () => {
-      $q.dialog({
-          title: 'Add new album',
-          message: 'Which is the name of the new album?',
-          prompt: {
-            model: '',
-            isValid: val => val.length > 5,
-            type: 'text'
-          },
-          cancel: true,
-          persistent: true
-      }).onOk(data => {
-        albumStore.addAlbum(data)
-        albumStore.addHashesToAlbum(data, selectedFileListRef.value)
-        selectedFileListRef.value = new Set();
-        showSelectionToolbarModalRef.value = false;
-        isActiveLongPressRef.value = false;
-        $q.notify({
-          type: 'positive',
-          message: `Album "${data}" created successfully!`
-        })
-      }).onCancel(() => {
-        handleSelectedFilesActionModalCancel();
-        selectedFileListRef.value = new Set();
-        showSelectionToolbarModalRef.value = false;
-        isActiveLongPressRef.value = false;
-      });
+  $q.dialog({
+    title: 'Add new album',
+    message: 'Which is the name of the new album?',
+    prompt: {
+      model: '',
+      isValid: val => val.length > 5,
+      type: 'text'
+    },
+    cancel: true,
+    persistent: true
+  }).onOk(data => {
+    albumStore.addAlbum(data)
+    albumStore.addHashesToAlbum(data, selectedFileListRef.value)
+    selectedFileListRef.value = new Set();
+    showSelectionToolbarModalRef.value = false;
+    isActiveLongPressRef.value = false;
+    $q.notify({
+      type: 'positive',
+      message: `Album "${data}" created successfully!`
+    })
+  }).onCancel(() => {
+    handleSelectedFilesActionModalCancel();
+    selectedFileListRef.value = new Set();
+    showSelectionToolbarModalRef.value = false;
+    isActiveLongPressRef.value = false;
+  });
 }
 
 const handleLocationConfirm = (location: ILocation) => {
+  $q.notify({
+    type: 'info',
+    message: 'Location filter applied',
+    timeout: 1000
+  })
   selectedLocationRef.value = location;
   filtersRef.value.geohash.active = true;
   filtersRef.value.geohash.latitude = location.latitude;
@@ -176,7 +215,11 @@ const handleLocationConfirm = (location: ILocation) => {
 }
 
 const handleLocationCancel = () => {
-  console.log('Location selection canceled');
+  $q.notify({
+    type: 'info',
+    message: 'Location filter removed',
+    timeout: 1000
+  })
   selectedLocationRef.value = null;
   filtersRef.value.geohash.active = false;
   filtersRef.value.geohash.latitude = null;
@@ -188,6 +231,11 @@ const handleDateRangeConfirm = ({startDate, endDate}: {
   startDate: Date | null,
   endDate: Date | null
 }) => {
+  $q.notify({
+    type: 'info',
+    message: 'Date filter applied',
+    timeout: 1000
+  })
   filtersRef.value.dateRange.active = true;
   filtersRef.value.dateRange.startDate = startDate;
   filtersRef.value.dateRange.endDate = endDate;
@@ -199,6 +247,26 @@ const handleDateRangeCancel = () => {
   filtersRef.value.dateRange.endDate = null;
 }
 
+const addFilterOnlyFilesNotInAlbum = () => {
+  isActivatedOnlyFilesNotInAlbumRef.value = !isActivatedOnlyFilesNotInAlbumRef.value;
+  if (isActivatedOnlyFilesNotInAlbumRef.value) {
+    const hashesInAlbums = new Set();
+    albumStore.getAlbums().forEach(album => {
+      album.hashes.forEach(hash => hashesInAlbums.add(hash));
+    });
+    filtersRef.value.excludeHashList = Array.from(hashesInAlbums) as string[];
+  } else {
+    filtersRef.value.excludeHashList = null;
+  }
+
+  $q.notify({
+    type: 'info',
+    message: isActivatedOnlyFilesNotInAlbumRef.value ?
+      'Filter Only files not in album active' :
+      'Filter Only files not in album removed',
+    timeout: 1000
+  })
+};
 
 const addFilterDateRange = () => {
   showDateRangeModalRef.value = true;

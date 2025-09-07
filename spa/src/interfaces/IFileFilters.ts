@@ -1,4 +1,4 @@
-import type {FileTypeEnum} from "@/protobuf/photosphere-file.ts";
+import type {FileTypeEnum} from "@/interfaces/IPhotosphereViewFile.ts";
 
 export default interface IFileFilters {
   dateRange: {
@@ -13,5 +13,6 @@ export default interface IFileFilters {
     radius: number,
   },
   hashList?: string[] | null,
+  excludeHashList?: string[] | null,
   type?: FileTypeEnum
 }

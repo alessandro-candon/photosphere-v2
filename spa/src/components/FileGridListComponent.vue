@@ -98,6 +98,7 @@ onMounted(() => {
   fileService.initFileService();
   onLoadNewSignedUrl(0, () => {}).finally(
     () => {
+      loadingRef.value = false;
       fileService.syncAlbums().catch(
         () => {
           $q.notify({

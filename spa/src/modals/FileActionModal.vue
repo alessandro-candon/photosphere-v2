@@ -96,7 +96,7 @@ const handleShowInfo = async () => {
     title: 'File Info',
     message: `
       <div><strong>File Name:</strong> ${fileSigned.sourceBucketUri.split('/').pop()}</div>
-      <div><strong>Created At:</strong> ${new Date(fileSigned.createdAtTimestamp).toLocaleString()}</div>
+      <div><strong>Created At:</strong> ${new Date(fileSigned.createdAtTimestamp * 1000).toLocaleString()}</div>
       <div><strong>Hash:</strong> ${fileSigned.hash}</div>
       <div><strong>GeoHash:</strong> ${fileSigned.geohash}</div>
       <div><strong>FileType:</strong> ${getFileTypeLabel(fileSigned.fileType)}</div>

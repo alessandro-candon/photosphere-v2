@@ -12,7 +12,7 @@ const fileCashedCountRef = ref<number | null>(null);
 const versionRef = ref<string>('Loading...');
 
 fileCountRef.value = fileStore.files.length;
-fileCashedCountRef.value = fileStore.signedUrlsMap.size;
+fileCashedCountRef.value = fileStore.signedUrlsMap.size - 2;
 
 fetch('/version.txt')
   .then(response => response.text())

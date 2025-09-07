@@ -73,9 +73,6 @@ const handleImageClick = (file: IPhotosphereViewFile) => {
     :album="props.album"
     :isActiveAddToAlbum="false"
     :isActiveRemoveFromAlbum="true"
-    @open="console.log('File open', $event)"
-    @showInfo="console.log('File show info', $event)"
-    @addToAlbum="console.log('File add to album', $event)"
     @cancel="showFileActionModalRef = false"
   />
 </template>

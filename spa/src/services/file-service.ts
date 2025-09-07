@@ -121,6 +121,9 @@ class FileService {
     }
     return files.filter((file: IPhotosphereFile) => {
       let isMatchingTheFilter = true;
+      if (filter.excludeHashList && filter.excludeHashList.length >= 0) {
+        isMatchingTheFilter = !filter.excludeHashList.includes(file.hash);
+      }
       if (filter.hashList && filter.hashList.length >= 0) {
         isMatchingTheFilter = filter.hashList.includes(file.hash);
       }

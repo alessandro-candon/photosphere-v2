@@ -1,8 +1,11 @@
 import {describe, it, expect, beforeEach} from 'vitest';
 import {fileService} from '@/services/file-service.ts';
-import {FileTypeEnum, type IPhotosphereFile} from '@/protobuf/photosphere-file.ts';
 import type IFileFilters from "@/interfaces/IFileFilters.ts";
-import type {IPhotosphereViewFile} from "@/interfaces/IPhotosphereViewFile.ts";
+import {
+  FileTypeEnum,
+  type IPhotosphereFile,
+  type IPhotosphereViewFile
+} from "@/interfaces/IPhotosphereViewFile.ts";
 
 describe('FileService', () => {
   let mockFiles: IPhotosphereFile[];
