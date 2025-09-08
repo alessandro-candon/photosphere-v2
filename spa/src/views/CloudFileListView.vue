@@ -84,6 +84,7 @@ import HeaderPageComponent from "@/components/HeaderPageComponent.vue";
 import FileActionModal from "@/modals/FileActionModal.vue";
 import SelectAlbumModal from "@/modals/SelectAlbumModal.vue";
 import type {IAlbum} from "@/interfaces/IAlbum.ts";
+import {fileService} from "@/services/file-service.ts";
 
 firebaseService.initStorage();
 
@@ -159,6 +160,15 @@ const handleAlbumChoice = (album: IAlbum) => {
     return;
   }
   albumStore.addHashesToAlbum(album.name, selectedFileListRef.value);
+  fileService.syncAlbums().catch(
+    _ => {
+      $q.notify({
+        type: 'negative',
+        message: 'Error syncing albums, please do it manually from album view',
+        timeout: 1000
+      })
+    }
+  )
   $q.notify({
     type: 'positive',
     message: `Added ${selectedFileListRef.value.size} files to album "${album.name}"`,
