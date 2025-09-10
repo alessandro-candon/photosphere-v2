@@ -25,6 +25,10 @@ export const useFileStore: StoreDefinition = defineStore('file-store', {
     },
     getSignedUrlMap(bucketUri: string): string | undefined {
       return this.signedUrlsMap.get(bucketUri);
+    },
+    clearCache(): void {
+      this.files = [];
+      this.signedUrlsMap.clear();
     }
   },
   persist: {

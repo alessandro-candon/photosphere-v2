@@ -1,6 +1,5 @@
 import os
 from unittest import TestCase
-
 from src.file.image.image import PhotosphereImage
 from src.file.path import PhotospherePath
 
@@ -104,3 +103,15 @@ class TestPhotosphereImage(TestCase):
         thumbnail = psImage.thumbnail_local_path.get_string()
         assert thumbnail is not None
         psImage.__del__()
+
+    def test_image_heic_format(self):
+        path = os.path.abspath(
+            os.path.join(
+                self.current_dir, '../../../resources/original_images/landscape_macos.HEIC'
+            )
+        )
+        psImage = PhotosphereImage(PhotospherePath(path))
+        assert psImage.file_path.get_string() == path
+        assert psImage.get_file_type() == 'IMAGE'
+        assert psImage.created_at.isoformat() == '2020-07-11T10:17:23'
+        assert psImage.average_hash == "fff8cffc0ff807f907f803f803f003f803f803f90fb99f089fc0c1e000fc03fe"

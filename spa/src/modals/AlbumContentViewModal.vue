@@ -51,13 +51,16 @@ const handleImageClick = (file: IPhotosphereViewFile) => {
 
 <template>
   <q-dialog class="dialog-album-content full-screen-dialog" v-model="dialogModel" persistent>
-    <q-card class="full-width full-height">
-      <q-card-section>
+    <q-card class="full-width full-height flex column">
+      <q-card-section class="sticky-top-bar">
         <div class="row items-center justify-between">
+          <div class="text-h6 ellipsis" style="max-width: 70vw;">
+            {{ props.album.name }}
+          </div>
           <q-btn flat round icon="close" @click="dialogModel = false" aria-label="Close"/>
         </div>
       </q-card-section>
-      <q-card-section class="q-pa-none" style="flex: 1; overflow: auto;">
+      <q-card-section class="q-pa-none flex-1 scroll-area" style="overflow: auto;">
         <FileGridListComponent
           :filters="filters"
           :selectedFileList="selectedFileList"
@@ -95,5 +98,30 @@ const handleImageClick = (file: IPhotosphereViewFile) => {
   border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 2px 24px rgba(0, 0, 0, 0.18);
+}
+
+.q-card.full-height.flex.column {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sticky-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+.scroll-area {
+  flex: 1;
+  overflow: auto;
+}
+
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

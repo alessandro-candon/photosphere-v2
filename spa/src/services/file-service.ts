@@ -33,7 +33,7 @@ class FileService {
     return new Promise(async (resolve, reject) => {
       this.fileStore.getFiles(await this.getSignedUrlIfNotExists(this.DATABASE_URI))
         .then(async (files: IPhotosphereFile[]) => {
-          files = this.filterFiles(files, filter);
+          files = this.filterFiles(files, filter).sort((a, b) => b.createdAtTimestamp - a.createdAtTimestamp);
           const startIndex = page * pageSize;
           const endIndex = startIndex + pageSize;
           const slicedFiles = files.slice(startIndex, endIndex);
@@ -143,6 +143,14 @@ class FileService {
       }
       if (filter.fileName && filter.fileName.length > 0) {
         isMatchingTheFilter = isMatchingTheFilter && file.sourceBucketUri.toLowerCase().includes(filter.fileName.toLowerCase());
+      }
+      if (filter.singleDateList && filter.singleDateList.length > 0) {
+        isMatchingTheFilter = isMatchingTheFilter &&
+          filter.singleDateList.some(date => {
+            const singleDateStart = date.setHours(0,0,0,0) / 1000;
+            const singleDateEnd = date.setHours(23,59,59,999) / 1000;
+            return file.createdAtTimestamp >= singleDateStart && file.createdAtTimestamp <= singleDateEnd;
+          });
       }
       return isMatchingTheFilter;
     })

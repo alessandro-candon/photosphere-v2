@@ -45,10 +45,12 @@ def loop_on_files(
         db: TinyDB
     ):
 
+    hash = PhotosphereFile(file_path).get_hash()
+    if db.contains(Query().hash == hash):
+        return
+
     if file_path.is_allowed_extension(PhotosphereImage.ALLOWED_EXTENSIONS):
         ps = PhotosphereImage(file_path)
-        if db.contains(Query().hash == ps.get_hash()):
-            return
         ps.generate_thumbnail()
         ps.set_thumbnail_bucket_uri(upload_blob_if_not_exist(
             ps.thumbnail_local_path.get_string(),
@@ -57,8 +59,6 @@ def loop_on_files(
         )
     elif file_path.is_allowed_extension(PhotosphereVideo.ALLOWED_EXTENSIONS):
         ps = PhotosphereVideo(file_path)
-        if db.contains(Query().hash == ps.get_hash()):
-            return
         ps.generate_thumbnail()
         ps.set_thumbnail_bucket_uri(upload_blob_if_not_exist(
             ps.thumbnail_local_path.get_string(),
@@ -66,8 +66,6 @@ def loop_on_files(
             bucket_name))
     elif file_path.is_allowed_extension(PhotosphereFile.ALLOWED_EXTENSIONS):
         ps = PhotosphereFile(file_path)
-        if db.contains(Query().hash == ps.get_hash()):
-            return
     else:
         return
 

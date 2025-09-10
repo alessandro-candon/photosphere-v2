@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { QCard, QCardSection, QPage } from "quasar";
+import {QBtn, QCard, QCardSection, QPage, useQuasar} from "quasar";
 import HeaderPageComponent from "@/components/HeaderPageComponent.vue";
 import { useFirebaseStore } from "@/stores/firebase-store.ts";
 import { ref } from "vue";
 import {useFileStore} from "@/stores/file-store.ts";
+import {fileService} from "@/services/file-service.ts";
+import {useAlbumStore} from "@/stores/album-store.ts";
 
+const $q = useQuasar();
 const firebaseStore = useFirebaseStore();
 const fileStore = useFileStore();
+const albumStore = useAlbumStore();
 const fileCountRef = ref<number | null>(null);
 const fileCashedCountRef = ref<number | null>(null);
 const versionRef = ref<string>('Loading...');
@@ -20,6 +24,24 @@ fetch('/version.txt')
     versionRef.value = data;
   });
 
+const handleFileClearCache = () => {
+  fileStore.clearCache();
+  fileCountRef.value = 0;
+  fileCashedCountRef.value = 0;
+  $q.notify({
+    type: 'info',
+    message: 'File cache cleared',
+  })
+}
+
+const handleAlbumClearCache = async () => {
+  albumStore.clearCache();
+  await fileService.syncAlbums();
+  $q.notify({
+    type: 'info',
+    message: 'File cache cleared',
+  })
+}
 
 </script>
 
@@ -56,6 +78,13 @@ fetch('/version.txt')
             </section>
           </div>
           <div v-else>No cached files found</div>
+        </q-card-section>
+      </q-card>
+      <q-card class="q-mt-lg" style="max-width: 500px; width: 100%;">
+        <q-card-section>
+          <div class="text-h6">File Cache Actions</div>
+          <q-btn color="negative" label="Delete File Cache" @click="handleFileClearCache" />
+          <q-btn color="negative" label="Delete Album Cache" @click="handleAlbumClearCache" />
         </q-card-section>
       </q-card>
     </div>

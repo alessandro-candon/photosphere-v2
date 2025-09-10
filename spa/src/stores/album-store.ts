@@ -39,8 +39,8 @@ export const useAlbumStore = defineStore('album-store', {
       }
       return this.albums;
     },
-    setAlbums(albums: IAlbum[]) {
-      this.albums = albums;
+    clearCache() {
+      this.albums = [];
     }
   },
   persist: {

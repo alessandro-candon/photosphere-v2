@@ -84,8 +84,6 @@ const checkFirebaseConfiguration = () => {
     console.error(error);
     loadingRef.value = false;
     firebaseInitRef.value =false;
-  }).finally(() => {
-    loadingRef.value = false;
   })
 }
 

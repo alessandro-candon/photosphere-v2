@@ -108,3 +108,4 @@ out
 .venv
 photosphere_database_cloud.json
 photosphere_database_cloud.pb
+local_database.json

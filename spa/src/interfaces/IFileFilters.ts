@@ -16,4 +16,5 @@ export default interface IFileFilters {
   excludeHashList?: string[] | null,
   type?: FileTypeEnum,
   fileName?: string | null,
+  singleDateList?: Date[] | null,
 }

@@ -11,7 +11,7 @@ import imagehash
 
 class PhotosphereImage(PhotosphereFile):
     TYPE = "IMAGE"
-    ALLOWED_EXTENSIONS: set[str] = {'.png', '.jpg', '.jpeg', '.tiff'}
+    ALLOWED_EXTENSIONS: set[str] = {'.png', '.jpg', '.jpeg', '.tiff', '.heic'}
     HASH_SIZE = 16
 
     def __init__(self, local_file_path: PhotospherePath):
