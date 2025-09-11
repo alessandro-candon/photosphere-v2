@@ -26,7 +26,7 @@ const selectedFileListRef = ref<Set<string>>(new Set<string>());
 
 let longPressTimeout: ReturnType<typeof setTimeout> | null = null;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-let longPressTriggered:boolean = false;
+let longPressTriggered: boolean = false;
 const longPressActive = ref(false);
 
 const props = defineProps<{
@@ -40,12 +40,12 @@ const filtersRef = ref(props.filters);
 watch(() => props.filters, (newFilters) => {
   filtersRef.value = newFilters;
   reloadFileList();
-}, { deep: true });
+}, {deep: true});
 
 watch(() => props.selectedFileList, (newSelectedFileList) => {
   selectedFileListRef.value = newSelectedFileList;
   console.log(selectedFileListRef.value);
-}, { deep: true });
+}, {deep: true});
 
 const onLoadNewSignedUrl = async (index: number, done: (stop?: boolean) => void) => {
   const result = await fileService.getViewListOfFiles(index, filtersRef.value);
@@ -87,16 +87,19 @@ const handleImagePressEnd = () => {
 };
 
 function reloadFileList() {
+  loadingRef.value = true;
   filesViewRef.value = [];
   isNextPageAvailableRef.value = true;
-  onLoadNewSignedUrl(0, () => {});
+  onLoadNewSignedUrl(0, () => {
+  });
 }
 
 
 onMounted(() => {
   loadingRef.value = true;
   fileService.initFileService();
-  onLoadNewSignedUrl(0, () => {}).finally(
+  onLoadNewSignedUrl(0, () => {
+  }).finally(
     () => {
       loadingRef.value = false;
       fileService.syncAlbums().catch(
@@ -113,60 +116,60 @@ onMounted(() => {
 </script>
 
 <template>
-    <div v-if="loadingRef" class="q-my-xl flex flex-center column">
-      <q-spinner color="primary" size="40px" class="q-mb-md"/>
-    </div>
+  <div v-if="loadingRef" class="q-my-xl flex flex-center column">
+    <q-spinner color="primary" size="40px" class="q-mb-md"/>
+  </div>
 
-    <div v-if="!loadingRef && !errorRef && filesViewRef.length === 0"
-         class="q-my-xl flex flex-center column text-grey">
-      <q-icon name="folder_open" size="48px" class="q-mb-md"/>
-      <div>No files found</div>
-    </div>
+  <div v-if="!loadingRef && !errorRef && filesViewRef.length === 0"
+       class="q-my-xl flex flex-center column text-grey">
+    <q-icon name="folder_open" size="48px" class="q-mb-md"/>
+    <div>No files found</div>
+  </div>
 
-    <div v-if="!loadingRef && !errorRef && filesViewRef.length > 0" class="photo-grid-container">
-      <q-infinite-scroll @load="onLoadNewSignedUrl" :offset="800" :debounce="200">
-        <div class="photo-grid">
-          <div
-            :class="['photo-item']"
-            v-for="(file, index) in filesViewRef"
-            :key="index">
-            <q-img
-              :src="file.signedThumbnailUrl ? file.signedThumbnailUrl : 'no-file-preview.png'"
-              class="photo-image"
-              fit="cover"
-              loading="lazy"
-              :ratio="1"
-              @click="onImageClick(file)"
-              @mousedown="handleImagePressStart(file)"
-              @mouseup="handleImagePressEnd"
-              @mouseleave="handleImagePressEnd"
-              @touchstart="handleImagePressStart(file)"
-              @touchend="handleImagePressEnd"
+  <div v-if="!loadingRef && !errorRef && filesViewRef.length > 0" class="photo-grid-container">
+    <q-infinite-scroll @load="onLoadNewSignedUrl" :offset="800" :debounce="200">
+      <div class="photo-grid">
+        <div
+          :class="['photo-item']"
+          v-for="(file, index) in filesViewRef"
+          :key="index">
+          <q-img
+            :src="file.signedThumbnailUrl ? file.signedThumbnailUrl : 'no-file-preview.png'"
+            class="photo-image"
+            fit="cover"
+            loading="lazy"
+            :ratio="1"
+            @click="onImageClick(file)"
+            @mousedown="handleImagePressStart(file)"
+            @mouseup="handleImagePressEnd"
+            @mouseleave="handleImagePressEnd"
+            @touchstart="handleImagePressStart(file)"
+            @touchend="handleImagePressEnd"
+          />
+          <div class="file-type-icon">
+            <q-icon
+              :name="getFileTypeIcon(file.fileType)"
+              :color="getFileTypeColor(file.fileType)"
+              size="20px"
             />
-            <div class="file-type-icon">
-              <q-icon
-                :name="getFileTypeIcon(file.fileType)"
-                :color="getFileTypeColor(file.fileType)"
-                size="20px"
-              />
-            </div>
-            <div class="file-selected-icon">
-              <q-icon
-                v-if="selectedFileListRef.has(file.hash)"
-                name="check_circle"
-                color="white"
-                size="30px"
-              ></q-icon>
-            </div>
+          </div>
+          <div class="file-selected-icon">
+            <q-icon
+              v-if="selectedFileListRef.has(file.hash)"
+              name="check_circle"
+              color="white"
+              size="30px"
+            ></q-icon>
           </div>
         </div>
-        <template v-slot:loading v-if="isNextPageAvailableRef">
-          <div class="row justify-center q-my-md">
-            <q-spinner-dots color="primary" size="40px"/>
-          </div>
-        </template>
-      </q-infinite-scroll>
-    </div>
+      </div>
+      <template v-slot:loading v-if="isNextPageAvailableRef">
+        <div class="row justify-center q-my-md">
+          <q-spinner-dots color="primary" size="40px"/>
+        </div>
+      </template>
+    </q-infinite-scroll>
+  </div>
 </template>
 
 <style scoped>

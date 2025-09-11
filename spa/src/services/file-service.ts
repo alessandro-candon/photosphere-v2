@@ -50,7 +50,8 @@ class FileService {
               hash: file.hash,
               signedThumbnailUrl: signedUrl,
               sourceUri: file.sourceBucketUri,
-              fileType: file.fileType
+              fileType: file.fileType,
+              createdAtTimestamp: file.createdAtTimestamp,
             });
           }
           resolve(viewFiles);

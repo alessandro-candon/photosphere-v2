@@ -3,6 +3,7 @@ export interface IPhotosphereViewFile {
   sourceUri: string;
   fileType: FileTypeEnum;
   hash: string;
+  createdAtTimestamp?: number; // Added for day-by-day segmentation
 }
 
 export interface IPhotosphereFile {
