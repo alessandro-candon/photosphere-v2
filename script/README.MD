@@ -24,45 +24,10 @@ Will be also created a CSV file with the data of the photos/videos.
 * --destination: This is the destination directory where the photos/videos will be copied, if the folder exists, thrown an error.
 
 
-### CORS ERROR ON STORAGE
-
-If you have a CORS error on the storage, you can add the following headers to your storage bucket:
-
-```shell
-gsutil cors set cors.json gs://your-bucket-name
-```
-
-Where `cors.json` is a file with the following content:
-
-```json
-[
-  {
-    "origin": ["*"],
-    "method": ["GET", "PUT", "POST", "DELETE", "HEAD", "OPTIONS"],
-    "responseHeader": ["*"],
-    "maxAgeSeconds": 60
-  }
-]
-```
-
-
 ### Installation
 
-To install the dependencies and devDependencies:
+This command will install the pkg in your local machine.
 
-```sh
-pip install -r requirements.txt
-```
-
-and export the cli command:
-
-```sh
-pip install --editable .
-```
-
-Check if it works:
-
-```sh
-photosphere --help
-photosphere version
+```bash
+./deploy.sh
 ```
