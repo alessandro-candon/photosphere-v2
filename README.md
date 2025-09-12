@@ -36,8 +36,8 @@ gcloud config set project <project-id>
 ```
 
 7. Add firebase app data to the project using the command:
-```sh
-firebase apps:sdkconfig > firebase.json 
+```bash
+./firebase_sdk_setup.sh
 ```
 
 8. Select payment plan for the project using the firebase console:
@@ -69,37 +69,7 @@ Then click on "Production mode".
 gcloud storage buckets update gs://<project-id>.firebasestorage.app --cors-file=cors.json
 ```
 
-12. Generate the production ready of the web app using the command (you should have npm installed):
+12. Deploy the project using the command:
 ```sh
-npm run build
+./deploy.sh
 ```
-
-13. Add hosting rules to the firebase.json using the command:
-```json
-{
-  ...,
-  "hosting": {
-    "public": "spa/dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
-  },
-  ...
-}
-```
-
-
-14. Deploy the web app, the functions and the firestore rules using the command (you will get the hosting url as output):
-```sh
-firebase deploy --only hosting
-```
-
-15. Now you can start using the CLI
