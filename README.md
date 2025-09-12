@@ -3,6 +3,9 @@
 Photosphere v2 is a web application that allows users to upload photos, videos and some files and view them in everyware. 
 The application is built using modern web technologies and is designed to be user-friendly, responsive, secure and cheaper!
 
+![photosphere experience.gif](doc/photosphere%20experience.gif)
+
+
 **Really cheaper, from 6 to 20 times less then google photos!**
 
 ## Project deploy
