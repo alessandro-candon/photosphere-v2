@@ -18,6 +18,7 @@ class FileService {
   fileStore!: ReturnType<StoreDefinition>;
   albumStore!: ReturnType<StoreDefinition>;
   pageSize = 10;
+  parallelSignedUrlRequests = 3;
 
 
   initFileService(): void {
@@ -38,22 +39,50 @@ class FileService {
           const endIndex = startIndex + pageSize;
           const slicedFiles = files.slice(startIndex, endIndex);
           const viewFiles: IPhotosphereViewFile[] = [];
-          for (const file of slicedFiles) {
-            let signedUrl: string | false = false;
-            try {
-              signedUrl = await this.getSignedUrlIfNotExists(file.sourceBucketThumbnailUri);
-            } catch (e) {
-              console.error(`Failed to get signed URL for ${file.sourceBucketThumbnailUri}:`, e);
-              signedUrl = false;
+          for (let i = 0; i < slicedFiles.length; i += 3) {
+            const photosphereViewFilesPromises: Promise<IPhotosphereViewFile>[] = [];
+            for (
+              let j = 0;
+              j < this.parallelSignedUrlRequests &&
+              j + i < slicedFiles.length;
+              j++
+            ) {
+              console.log('i:', i, 'j:', j, 'sum:', i+j);
+              const file = slicedFiles[i + j];
+              photosphereViewFilesPromises.push(new Promise(async (res, rej) => {
+                let signedUrl: boolean | string = false;
+                try {
+                  signedUrl = await this.getSignedUrlIfNotExists(file.sourceBucketThumbnailUri);
+                } finally {
+                  res({
+                    hash: file.hash,
+                    signedThumbnailUrl: signedUrl,
+                    sourceUri: file.sourceBucketUri,
+                    fileType: file.fileType,
+                    createdAtTimestamp: file.createdAtTimestamp,
+                  });
+                }
+              }));
             }
-            viewFiles.push({
-              hash: file.hash,
-              signedThumbnailUrl: signedUrl,
-              sourceUri: file.sourceBucketUri,
-              fileType: file.fileType,
-              createdAtTimestamp: file.createdAtTimestamp,
-            });
+            const photosphereViewFiles = await Promise.all(photosphereViewFilesPromises);
+            viewFiles.push(...photosphereViewFiles);
           }
+          // for (const file of slicedFiles) {
+          //   let signedUrl: string | false = false;
+          //   try {
+          //     signedUrl = await this.getSignedUrlIfNotExists(file.sourceBucketThumbnailUri);
+          //   } catch (e) {
+          //     console.error(`Failed to get signed URL for ${file.sourceBucketThumbnailUri}:`, e);
+          //     signedUrl = false;
+          //   }
+          //   viewFiles.push({
+          //     hash: file.hash,
+          //     signedThumbnailUrl: signedUrl,
+          //     sourceUri: file.sourceBucketUri,
+          //     fileType: file.fileType,
+          //     createdAtTimestamp: file.createdAtTimestamp,
+          //   });
+          // }
           resolve(viewFiles);
         })
         .catch((error: unknown) => {
@@ -117,8 +146,8 @@ class FileService {
       filter.dateRange.startDate &&
       filter.dateRange.endDate;
     if (filterDateRangeIsActive) {
-      startDateTimestamp = (filter.dateRange.startDate as Date).setHours(0,0,0,0) / 1000;
-      endDateTimestamp = (filter.dateRange.endDate as Date).setHours(23,59,59,999) / 1000;
+      startDateTimestamp = (filter.dateRange.startDate as Date).setHours(0, 0, 0, 0) / 1000;
+      endDateTimestamp = (filter.dateRange.endDate as Date).setHours(23, 59, 59, 999) / 1000;
     }
     return files.filter((file: IPhotosphereFile) => {
       let isMatchingTheFilter = true;
@@ -148,8 +177,8 @@ class FileService {
       if (filter.singleDateList && filter.singleDateList.length > 0) {
         isMatchingTheFilter = isMatchingTheFilter &&
           filter.singleDateList.some(date => {
-            const singleDateStart = date.setHours(0,0,0,0) / 1000;
-            const singleDateEnd = date.setHours(23,59,59,999) / 1000;
+            const singleDateStart = date.setHours(0, 0, 0, 0) / 1000;
+            const singleDateEnd = date.setHours(23, 59, 59, 999) / 1000;
             return file.createdAtTimestamp >= singleDateStart && file.createdAtTimestamp <= singleDateEnd;
           });
       }
