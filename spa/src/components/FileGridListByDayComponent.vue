@@ -130,10 +130,11 @@ const filesByDateRef = computed<Map<string, IPhotosphereViewFile[]>>(() => {
       if (!groupedFiles.has(dateKey)) {
         groupedFiles.set(dateKey, []);
       }
-      groupedFiles.get(dateKey)!.push(file);
+      if (groupedFiles.has(dateKey) && !groupedFiles.get(dateKey)?.find(f => f.hash === file.hash)) {
+        groupedFiles.get(dateKey)!.push(file);
+      }
     }
   });
-
   return groupedFiles;
 });
 </script>
