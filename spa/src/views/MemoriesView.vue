@@ -3,6 +3,8 @@ import HeaderPageComponent from "@/components/HeaderPageComponent.vue";
 import FileGridListComponent from "@/components/FileGridListComponent.vue";
 import {onMounted, ref} from "vue";
 import type IFileFilters from "@/interfaces/IFileFilters.ts";
+import type {IPhotosphereViewFile} from "@/interfaces/IPhotosphereViewFile.ts";
+import {fileService} from "@/services/file-service.ts";
 
 const filtersRef = ref<IFileFilters>({
   singleDateList: [],
@@ -16,7 +18,9 @@ const filtersRef = ref<IFileFilters>({
     latitude: null,
     longitude: null,
     radius: 0
-  }});
+  }
+});
+
 
 onMounted(() => {
   const today = new Date();
@@ -29,6 +33,11 @@ onMounted(() => {
   }
 })
 
+const handleImageClick = async (file: IPhotosphereViewFile) => {
+  const fileSigned = await fileService.getFileWithSignedUrlsByHash(file.hash)
+  window.open(fileSigned.signedSourceBucketUri, '_blank');
+}
+
 </script>
 
 <template>
@@ -37,7 +46,7 @@ onMounted(() => {
     <FileGridListComponent
       :filters="filtersRef"
       :selected-file-list="new Set<string>()"
-      @image-click="console.log('click', $event)"
+      @on-image-click="handleImageClick"
       @image-long-press="console.log('long press', $event)"
     ></FileGridListComponent>
   </q-page>

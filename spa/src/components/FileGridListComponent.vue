@@ -27,13 +27,17 @@ const selectedFileListRef = ref<Set<string>>(new Set<string>());
 let longPressTimeout: ReturnType<typeof setTimeout> | null = null;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let longPressTriggered: boolean = false;
-const longPressActive = ref(false);
+const longPressActiveRef = ref(false);
 
 const props = defineProps<{
   filters: IFileFilters
   selectedFileList: Set<string>
 }>();
-const emit = defineEmits(['imageClick', 'imageLongPress']);
+const emit = defineEmits<{
+  (e: 'onImageClick', file: IPhotosphereViewFile): void;
+  (e: 'onImageLongPress', file: IPhotosphereViewFile): void;
+  (e: 'onUpdateFilesInViewPort', files: IPhotosphereViewFile[]): void;
+}>();
 const filtersRef = ref(props.filters);
 
 
@@ -56,16 +60,17 @@ const onLoadNewSignedUrl = async (index: number, done: (stop?: boolean) => void)
     isNextPageAvailableRef.value = false;
   }
   loadingRef.value = false;
+  emit('onUpdateFilesInViewPort', filesViewRef.value)
   done(isStop)
 }
 
 const onImageClick = (file: IPhotosphereViewFile) => {
-  emit('imageClick', file);
+  emit('onImageClick', file);
 };
 
 const onImageLongPress = (file: IPhotosphereViewFile) => {
-  longPressActive.value = true;
-  emit('imageLongPress', file);
+  longPressActiveRef.value = true;
+  emit('onImageLongPress', file);
 };
 
 const handleImagePressStart = (file: IPhotosphereViewFile) => {
@@ -153,10 +158,16 @@ onMounted(() => {
               size="20px"
             />
           </div>
-          <div class="file-selected-icon">
+          <div class="file-selected-icon" v-if="longPressActiveRef">
             <q-icon
               v-if="selectedFileListRef.has(file.hash)"
               name="check_circle"
+              color="white"
+              size="30px"
+            ></q-icon>
+            <q-icon
+              v-else
+              name="circle"
               color="white"
               size="30px"
             ></q-icon>

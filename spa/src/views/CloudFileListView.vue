@@ -5,8 +5,9 @@
     <FileGridListComponent
       :filters="filtersRef"
       :selected-file-list="selectedFileListRef"
-      @image-click="handleImageClick"
-      @image-long-press="onImageLongPress"
+      @on-image-click="handleImageClick"
+      @on-image-long-press="handleImageLongPress"
+      @on-update-files-in-view-port="handleUpdateFilesInViewPort"
     ></FileGridListComponent>
 
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
@@ -85,6 +86,7 @@ import FileActionModal from "@/modals/FileActionModal.vue";
 import SelectAlbumModal from "@/modals/SelectAlbumModal.vue";
 import type {IAlbum} from "@/interfaces/IAlbum.ts";
 import {fileService} from "@/services/file-service.ts";
+import {onMounted, onBeforeUnmount} from 'vue';
 
 firebaseService.initStorage();
 
@@ -105,18 +107,69 @@ const filtersRef = ref<IFileFilters>({
   }
 });
 
-const isActiveLongPressRef = ref(false);
-const showDateRangeModalRef = ref(false);
-const selectedStartDateRef = ref<Date | null>(null);
-const selectedEndDateRef = ref<Date | null>(null);
-const showLocationModalRef = ref(false);
-const selectedLocationRef = ref<ILocation | null>(null);
-const selectedFileListRef = ref<Set<string>>(new Set());
-const showSelectionToolbarModalRef = ref(false);
-const showFileActionModalRef = ref(false);
-const selectedFileRef = ref<IPhotosphereViewFile | null>(null);
-const isActivatedOnlyFilesNotInAlbumRef = ref(false);
-const selectAlbumModalRef = ref(false);
+const [
+  isActiveLongPressRef,
+  showDateRangeModalRef,
+  selectedStartDateRef,
+  selectedEndDateRef,
+  showLocationModalRef,
+  selectedLocationRef,
+  selectedFileListRef,
+  showSelectionToolbarModalRef,
+  showFileActionModalRef,
+  selectedFileRef,
+  isActivatedOnlyFilesNotInAlbumRef,
+  selectAlbumModalRef,
+  isCommandKeyPressedRef,
+  filesInViewPortRef
+] = [
+  ref(false),
+  ref(false),
+  ref<Date | null>(null),
+  ref<Date | null>(null),
+  ref(false),
+  ref<ILocation | null>(null),
+  ref<Set<string>>(new Set()),
+  ref(false),
+  ref(false),
+  ref<IPhotosphereViewFile | null>(null),
+  ref(false),
+  ref(false),
+  ref(false),
+  ref<IPhotosphereViewFile[]>([])
+];
+
+
+const handleUpdateFilesInViewPort = (files: IPhotosphereViewFile[]) => {
+  filesInViewPortRef.value = files;
+}
+
+const toggleCommandKeyPressed = () => {
+  isCommandKeyPressedRef.value = !isCommandKeyPressedRef.value;
+};
+
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (event.metaKey && !isCommandKeyPressedRef.value) {
+    toggleCommandKeyPressed();
+  }
+};
+
+const handleKeyUp = (event: KeyboardEvent) => {
+  if (!event.metaKey && isCommandKeyPressedRef.value) {
+    toggleCommandKeyPressed();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener('keyup', handleKeyUp);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeyDown);
+  window.removeEventListener('keyup', handleKeyUp);
+});
+
 
 const addFilterFileType = () => {
   // Quasar dialog to select file type filter with a dropdown
@@ -161,7 +214,7 @@ const handleAlbumChoice = (album: IAlbum) => {
   }
   albumStore.addHashesToAlbum(album.name, selectedFileListRef.value);
   fileService.syncAlbums().catch(
-    _ => {
+    () => {
       $q.notify({
         type: 'negative',
         message: 'Error syncing albums, please do it manually from album view',
@@ -323,13 +376,43 @@ const handleImageClick = (file: IPhotosphereViewFile) => {
 }
 
 const toggleSelectionOfSelectionValue = (file: IPhotosphereViewFile) => {
+  if (isCommandKeyPressedRef.value) {
+    if (selectedFileListRef.value.size === 0) {
+          toggleSelectionOfSelectionValue(file);
+    } else {
+      console.log('Toggling selection of range');
+      // Get the last selected file
+      const lastSelectedHash = Array.from(selectedFileListRef.value).pop();
+      if (!lastSelectedHash) {
+        toggleSelectionOfSingleFile(file);
+      } else {
+        const files = filesInViewPortRef.value;
+        const lastIndex = files.findIndex(f => f.hash === lastSelectedHash);
+        const currentIndex = files.findIndex(f => f.hash === file.hash);
+        if (lastIndex === -1 || currentIndex === -1) {
+          toggleSelectionOfSingleFile(file);
+          return;
+        }
+        const [start, end] = lastIndex < currentIndex ? [lastIndex, currentIndex] : [currentIndex, lastIndex];
+        for (let i = start; i <= end; i++) {
+          selectedFileListRef.value.add(files[i].hash);
+        }
+        console.log('Selected files:', selectedFileListRef.value);
+      }
+    }
+  } else {
+    toggleSelectionOfSingleFile(file);
+  }
+}
+
+const toggleSelectionOfSingleFile = (file: IPhotosphereViewFile) => {
   if (selectedFileListRef.value.has(file.hash))
     selectedFileListRef.value.delete(file.hash);
   else
     selectedFileListRef.value.add(file.hash)
 }
 
-const onImageLongPress = () => {
+const handleImageLongPress = () => {
   showSelectionToolbarModalRef.value = true;
   isActiveLongPressRef.value = true;
 };
