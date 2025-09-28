@@ -5,6 +5,7 @@ import {onMounted, ref} from "vue";
 import type IFileFilters from "@/interfaces/IFileFilters.ts";
 import type {IPhotosphereViewFile} from "@/interfaces/IPhotosphereViewFile.ts";
 import {fileService} from "@/services/file-service.ts";
+import FileGridListByDayComponent from "@/components/FileGridListByDayComponent.vue";
 
 const filtersRef = ref<IFileFilters>({
   singleDateList: [],
@@ -23,7 +24,8 @@ const filtersRef = ref<IFileFilters>({
 
 
 onMounted(() => {
-  const today = new Date();
+  const today = new Date('2022-05-29');
+  console.log(today);
   const currentYear = today.getFullYear();
   for (let year = 1970; year <= currentYear; year++) {
     const toadyWithOldYear = new Date(today);
@@ -43,12 +45,12 @@ const handleImageClick = async (file: IPhotosphereViewFile) => {
 <template>
   <q-page class="q-pa-md">
     <HeaderPageComponent title="Memories"/>
-    <FileGridListComponent
+    <FileGridListByDayComponent
       :filters="filtersRef"
       :selected-file-list="new Set<string>()"
       @on-image-click="handleImageClick"
       @image-long-press="console.log('long press', $event)"
-    ></FileGridListComponent>
+    ></FileGridListByDayComponent>
   </q-page>
 </template>
 

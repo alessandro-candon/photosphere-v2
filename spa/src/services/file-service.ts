@@ -17,8 +17,8 @@ class FileService {
   ALBUMS_URI = '/photosphere_albums.json';
   fileStore!: ReturnType<StoreDefinition>;
   albumStore!: ReturnType<StoreDefinition>;
-  pageSize = 10;
-  parallelSignedUrlRequests = 3;
+  pageSize = 15;
+  parallelSignedUrlRequests = 5;
 
 
   initFileService(): void {
@@ -47,7 +47,6 @@ class FileService {
               j + i < slicedFiles.length;
               j++
             ) {
-              console.log('i:', i, 'j:', j, 'sum:', i+j);
               const file = slicedFiles[i + j];
               photosphereViewFilesPromises.push(new Promise(async (res, rej) => {
                 let signedUrl: boolean | string = false;
@@ -67,22 +66,6 @@ class FileService {
             const photosphereViewFiles = await Promise.all(photosphereViewFilesPromises);
             viewFiles.push(...photosphereViewFiles);
           }
-          // for (const file of slicedFiles) {
-          //   let signedUrl: string | false = false;
-          //   try {
-          //     signedUrl = await this.getSignedUrlIfNotExists(file.sourceBucketThumbnailUri);
-          //   } catch (e) {
-          //     console.error(`Failed to get signed URL for ${file.sourceBucketThumbnailUri}:`, e);
-          //     signedUrl = false;
-          //   }
-          //   viewFiles.push({
-          //     hash: file.hash,
-          //     signedThumbnailUrl: signedUrl,
-          //     sourceUri: file.sourceBucketUri,
-          //     fileType: file.fileType,
-          //     createdAtTimestamp: file.createdAtTimestamp,
-          //   });
-          // }
           resolve(viewFiles);
         })
         .catch((error: unknown) => {
