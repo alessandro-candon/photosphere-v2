@@ -22,8 +22,8 @@ class FileService {
 
 
   initFileService(): void {
-    if (!this.fileStore) this.fileStore = useFileStore();
-    if (!this.albumStore) this.albumStore = useAlbumStore();
+    this.fileStore ??= useFileStore();
+    this.albumStore ??= useAlbumStore();
   }
 
   getViewListOfFiles(
@@ -186,6 +186,12 @@ class FileService {
     } catch (e) {
       console.error('Failed to download or parse albums:', e);
       return [];
+    }
+  }
+
+  public async deleteDatabaseFromLocalCache(): Promise<void> {
+    if(this.fileStore.hasSignedUrlMap(this.DATABASE_URI)) {
+      this.fileStore.deleteSignedUrlMap(this.DATABASE_URI);
     }
   }
 }

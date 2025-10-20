@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import HeaderPageComponent from "@/components/HeaderPageComponent.vue";
-import FileGridListComponent from "@/components/FileGridListComponent.vue";
 import {onMounted, ref} from "vue";
 import type IFileFilters from "@/interfaces/IFileFilters.ts";
 import type {IPhotosphereViewFile} from "@/interfaces/IPhotosphereViewFile.ts";
@@ -24,7 +23,7 @@ const filtersRef = ref<IFileFilters>({
 
 
 onMounted(() => {
-  const today = new Date('2022-05-29');
+  const today = new Date();
   console.log(today);
   const currentYear = today.getFullYear();
   for (let year = 1970; year <= currentYear; year++) {

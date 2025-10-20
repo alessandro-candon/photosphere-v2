@@ -20,6 +20,9 @@ export const useFileStore: StoreDefinition = defineStore('file-store', {
     hasSignedUrlMap(bucketUri: string): boolean {
       return this.signedUrlsMap.has(bucketUri);
     },
+    deleteSignedUrlMap(bucketUri: string): boolean {
+      return this.signedUrlsMap.delete(bucketUri);
+    },
     setSignedUrlMap(bucketUri: string, signedUrl: string): void {
       this.signedUrlsMap.set(bucketUri, signedUrl);
     },
