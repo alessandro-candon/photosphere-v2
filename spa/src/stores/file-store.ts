@@ -10,6 +10,9 @@ export const useFileStore: StoreDefinition = defineStore('file-store', {
     signedUrlsMap: new Map<string, string>()
   }),
   actions: {
+    setFiles(files: IPhotosphereFile[]): void {
+      this.files = files;
+    },
     async getFiles(url: string): Promise<IPhotosphereFile[]> {
       if (this.files.length > 0) {
         return this.files

@@ -33,14 +33,18 @@ def copy_file_to_new_folder(file_path: PhotospherePath, destination_folder: Phot
     shutil.copy2(file_path.get_string(), new_file_path.get_string())
     return new_file_path
 
-def from_source_directory_to_nested_file_path(source_dir: str, file_path: str) -> str:
+def from_source_directory_to_nested_file_path(source_dir: str, file_path: str, subfolder: str = None) -> str:
     """
     :param source_dir: the source directory
     :param file_path: the file path
     :return: the file path nested in the source directory
     """
-    return os.path.relpath(file_path, source_dir)
-
+    result = os.path.relpath(file_path, source_dir)
+    print(result)
+    if subfolder is not None and result and '/' not in result:
+        return os.path.join(subfolder, result)
+    else:
+        return result
 
 def file_hash(file_path: PhotospherePath, buffer_size=65536) -> str:
     """

@@ -10,6 +10,7 @@ import type {
   IPhotosphereViewFile
 } from "@/interfaces/IPhotosphereViewFile.ts";
 import type {StoreDefinition} from "pinia";
+import {downloadAndDecodeProtobuf} from "@/protobuf/photosphere-file.ts";
 
 class FileService {
 
@@ -192,6 +193,8 @@ class FileService {
   public async deleteDatabaseFromLocalCache(): Promise<void> {
     if(this.fileStore.hasSignedUrlMap(this.DATABASE_URI)) {
       this.fileStore.deleteSignedUrlMap(this.DATABASE_URI);
+      const url = await this.getSignedUrlIfNotExists(this.DATABASE_URI)
+      this.fileStore.setFiles(await downloadAndDecodeProtobuf(url));
     }
   }
 }

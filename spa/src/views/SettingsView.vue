@@ -95,15 +95,18 @@ onMounted(() => {
           <div class="q-mt-lg">
             <div class="row">
               <div class="col">
-                <q-btn class="full-width" color="negative" label="Delete File Cache" @click="handleFileClearCache"/>
+                <q-btn class="full-width" color="negative" label="Delete File Cache"
+                       @click="handleFileClearCache"/>
               </div>
               <div class="col">
-                <q-btn class="full-width" color="negative" label="Delete Album Cache" @click="handleAlbumClearCache"/>
+                <q-btn class="full-width" color="negative" label="Delete Album Cache"
+                       @click="handleAlbumClearCache"/>
               </div>
             </div>
             <div class="row q-mt-lg">
               <div class="col">
-                <q-btn class="full-width" color="warning" label="Force sync database" @click="handleDatabaseLoad"/>
+                <q-btn class="full-width" color="warning" label="Force sync database"
+                       @click="handleDatabaseLoad"/>
               </div>
             </div>
           </div>
@@ -114,4 +117,8 @@ onMounted(() => {
 </template>
 
 <style scoped>
+pre {
+  white-space: pre-wrap; /* or normal, etc. */
+  overflow: auto; /* or hidden */
+}
 </style>

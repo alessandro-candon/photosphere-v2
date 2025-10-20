@@ -9,7 +9,7 @@ Images file support : '.png', '.jpg', '.jpeg', '.tiff'
 
 **organize** : This command will organize the photos in the directory according to the date and time of the photo taken.
 * --source : This is the source directory from where the photos will be taken.
-* --destination: This is the destination directory where the photos will be moved.
+* --out: This is the destination directory where the photos will be moved.
 * --suffix-to-exclude: This is the suffix of the file which will be excluded from the organization.
 
 **geneate**: This command will generate a CSV file with all data of your folders
@@ -22,6 +22,12 @@ This command will copy the photos/videos to a cloud storage, the folder on cloud
 Will be also created a CSV file with the data of the photos/videos.
 * --source : This is the source directory from where the photos/videos will be taken.
 * --destination: This is the destination directory where the photos/videos will be copied, if the folder exists, thrown an error.
+
+**convert_db_to_protobuf**:
+This command will convert a TinyDB database to Protobuf format, if you modify manually the database, you are be able to
+use this command to convert it to Protobuf format and use it with photosphere.
+* --source : This is the source TinyDB database file.
+* --out: This is the destination Protobuf file.
 
 
 ### Installation

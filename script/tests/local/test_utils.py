@@ -34,6 +34,18 @@ class TestPhotosphereImage(TestCase):
         actual = from_source_directory_to_nested_file_path(source_dir, file_path)
         assert actual == 'no_datetime/Capitol_Building_Full_View.jpg'
 
+    def test_from_source_directory_to_nested_file_path_with_folder_with_direct_file(self):
+        source_dir = '/Users/mac-ACANDO14/Site/personal/photosphere/photosphere-v2/out'
+        file_path = '/Users/mac-ACANDO14/Site/personal/photosphere/photosphere-v2/out/Capitol_Building_Full_View.jpg'
+        actual = from_source_directory_to_nested_file_path(source_dir, file_path)
+        assert actual == 'Capitol_Building_Full_View.jpg'
+
+    def test_from_source_directory_to_nested_file_path_with_folder_with_direct_file_and_subfolder(self):
+        source_dir = '/Users/mac-ACANDO14/Site/personal/photosphere/photosphere-v2/out'
+        file_path = '/Users/mac-ACANDO14/Site/personal/photosphere/photosphere-v2/out/Capitol_Building_Full_View.jpg'
+        actual = from_source_directory_to_nested_file_path(source_dir, file_path, 'subfolder')
+        assert actual == 'subfolder/Capitol_Building_Full_View.jpg'
+
     def test_hash_file(self):
         from src.local.utils import file_hash
         actual = file_hash(PhotospherePath(os.path.dirname(__file__) + "/test.txt"))

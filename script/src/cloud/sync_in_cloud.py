@@ -13,7 +13,7 @@ MOD_FOR_UPLOAD = 20
 CLOUD_DB_JSON_FILE = 'photosphere_database_cloud.json'
 CLOUD_DB_PB_FILE = 'photosphere_database_cloud.pb'
 
-def copy_in_cloud(source_path: PhotospherePath, bucket_name: str):
+def copy_in_cloud(source_path: PhotospherePath, bucket_name: str, subfolder: str = None):
 
     if exists_bucket(bucket_name):
         print(f"Bucket {bucket_name} already exists, continuing...")
@@ -27,7 +27,7 @@ def copy_in_cloud(source_path: PhotospherePath, bucket_name: str):
         print(f"Creating new database file {CLOUD_DB_JSON_FILE} in bucket {bucket_name}")
         db = TinyDB(CLOUD_DB_JSON_FILE)
 
-    loop_on_files(source_path, source_path, bucket_name, db)
+    loop_on_files(source_path, source_path, bucket_name, db, subfolder)
     db.insert_multiple(buffer_list)
     buffer_list.clear()
     upload_blob(CLOUD_DB_JSON_FILE, CLOUD_DB_JSON_FILE, bucket_name)
@@ -42,7 +42,8 @@ def loop_on_files(
         file_path: PhotospherePath,
         source_path: PhotospherePath,
         bucket_name: str,
-        db: TinyDB
+        db: TinyDB,
+        subfolder: str = None
     ):
 
     hash = PhotosphereFile(file_path).get_hash()
@@ -69,7 +70,7 @@ def loop_on_files(
     else:
         return
 
-    storage_path = from_source_directory_to_nested_file_path(source_path.get_string(), file_path.get_string())
+    storage_path = from_source_directory_to_nested_file_path(source_path.get_string(), file_path.get_string(), subfolder)
     source_bucket_uri = upload_blob_if_not_exist(file_path.get_string(), storage_path, bucket_name)
     ps.set_source_bucket_uri(source_bucket_uri)
 
